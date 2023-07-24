@@ -1,9 +1,7 @@
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from time import time
 from typing import Mapping
-
-from django.utils import timezone
 
 from sentry import analytics
 from sentry.models import (
@@ -76,7 +74,7 @@ def auto_resolve_project_issues(project_id, cutoff=None, chunk_size=1000, **kwar
     if cutoff:
         cutoff = datetime.utcfromtimestamp(cutoff).replace(tzinfo=timezone.utc)
     else:
-        cutoff = timezone.now() - timedelta(hours=int(age))
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=int(age))
 
     queryset = list(
         Group.objects.filter(project=project, last_seen__lte=cutoff, status=GroupStatus.UNRESOLVED)[
@@ -89,7 +87,7 @@ def auto_resolve_project_issues(project_id, cutoff=None, chunk_size=1000, **kwar
     for group in queryset:
         happened = Group.objects.filter(id=group.id, status=GroupStatus.UNRESOLVED).update(
             status=GroupStatus.RESOLVED,
-            resolved_at=timezone.now(),
+            resolved_at=datetime.now(timezone.utc),
             substatus=None,
         )
         remove_group_from_inbox(group, action=GroupInboxRemoveAction.RESOLVED)
