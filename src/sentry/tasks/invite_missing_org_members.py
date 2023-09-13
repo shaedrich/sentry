@@ -3,6 +3,7 @@ import logging
 from sentry import features
 from sentry.api.endpoints.organization_missing_org_members import _get_missing_organization_members
 from sentry.constants import ObjectStatus
+from sentry.models.options.organization_option import OrganizationOption
 from sentry.models.organization import Organization
 from sentry.notifications.notifications.missing_members_nudge import MissingMembersNudgeNotification
 from sentry.services.hybrid_cloud.integration import integration_service
@@ -51,6 +52,17 @@ def send_nudge_email(org_id):
     if not features.has("organizations:integrations-gh-invite", organization):
         logger.info(
             "invite_missing_org_members.send_nudge_email.missing_flag",
+            extra={"organization_id": org_id},
+        )
+        return
+
+    if not OrganizationOption.objects.get_value(
+        organization=organization,
+        key="sentry:github_nudge_invite",
+        default=True,
+    ):
+        logger.info(
+            "invite_missing_org_members.send_nudge_email.missing_option",
             extra={"organization_id": org_id},
         )
         return
