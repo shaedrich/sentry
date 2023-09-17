@@ -424,6 +424,7 @@ const ControlsWrapper = styled('div')`
   justify-content: space-between;
   @media (max-width: ${p => p.theme.breakpoints.small}) {
     display: block;
+    /* TODO, override ButtonBar instead of importing button grid here, then stop exporting ButtonGrid */
     ${ButtonGrid} {
       overflow: auto;
     }
