@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import {PlatformIcon} from 'platformicons';
 
+import StoryList from 'sentry/components/stories/storyList';
 import storyBook from 'sentry/stories/storyBook';
 import {space} from 'sentry/styles/space';
 
@@ -129,6 +130,12 @@ const platformToIcon = {
 };
 
 export default storyBook('PlatformIcon', story => {
+  story('See Also', () => (
+    <StoryList
+      links={['app/icons/icons.stories.tsx', 'app/components/logoSentry.stories.tsx']}
+    />
+  ));
+
   story('All', () => (
     <IconGrid>
       {Object.keys(platformToIcon).map(platform => (

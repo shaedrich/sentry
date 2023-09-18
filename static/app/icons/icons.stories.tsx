@@ -2,6 +2,7 @@ import {Fragment, useState} from 'react';
 import styled from '@emotion/styled';
 
 import Input from 'sentry/components/input';
+import StoryList from 'sentry/components/stories/storyList';
 import {Tooltip} from 'sentry/components/tooltip';
 import * as Icons from 'sentry/icons';
 import {space} from 'sentry/styles/space';
@@ -1218,6 +1219,16 @@ export default function IconsStories() {
           onChange={e => setSearchTerm(e.target.value.toLowerCase())}
         />
       </Sticky>
+      <section>
+        <SectionHeader>See Also</SectionHeader>
+
+        <StoryList
+          links={[
+            'app/components/logoSentry.stories.tsx',
+            'app/components/platformIcon.stories.tsx',
+          ]}
+        />
+      </section>
       <Section section={otherSection} />
       {filteredSections.map(section => (
         <Section key={section.id} section={section} />
