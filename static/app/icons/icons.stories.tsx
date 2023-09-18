@@ -1,5 +1,6 @@
 import {Fragment, useState} from 'react';
 import styled from '@emotion/styled';
+import {PlatformIcon} from 'platformicons';
 
 import Input from 'sentry/components/input';
 import StoryList from 'sentry/components/stories/storyList';
@@ -19,6 +20,130 @@ type TSection = {
   icons: TIcon[];
   id: string;
   label: string;
+};
+
+const platformToIcon = {
+  android: 'android',
+  apple: 'apple',
+  bun: 'bun',
+  capacitor: 'capacitor',
+  clojure: 'clojure',
+  cocoa: 'apple',
+  'cocoa-objc': 'apple',
+  'cocoa-swift': 'swift',
+  cordova: 'cordova',
+  cpp: 'cpp',
+  cryengine: 'cryengine',
+  csharp: 'csharp',
+  'csharp-aspnetcore': 'csharp',
+  dart: 'dart',
+  default: 'default',
+  dotnet: 'dotnet',
+  'dotnet-aspnetcore': 'dotnet',
+  'dotnet-aspnet': 'dotnet',
+  'dotnet-awslambda': 'aws',
+  'dotnet-blazor': 'blazor',
+  'dotnet-csharp': 'csharp',
+  'dotnet-gcpfunctions': 'gcp',
+  'dotnet-maui': 'maui',
+  'dotnet-uno': 'uno',
+  'dotnet-xamarin': 'xamarin',
+  dotnetcore: 'dotnetcore',
+  dotnetfx: 'dotnetfx',
+  electron: 'electron',
+  elixir: 'elixir',
+  flutter: 'flutter',
+  fsharp: 'fsharp',
+  git: 'git',
+  go: 'go',
+  'go-echo': 'echo',
+  godot: 'godot',
+  java: 'java',
+  'java-appengine': 'app-engine',
+  'java-android': 'android',
+  'java-log4j': 'java',
+  'java-log4j2': 'java',
+  'java-logback': 'logback',
+  'java-logging': 'java',
+  'java-spring': 'spring',
+  'java-spring-boot': 'springboot',
+  javascript: 'javascript',
+  'javascript-angular': 'angularjs',
+  'javascript-angularjs': 'angularjs',
+  'javascript-backbone': 'backbone',
+  'javascript-browser': 'javascript',
+  'javascript-capacitor': 'capacitor',
+  'javascript-cordova': 'cordova',
+  'javascript-electron': 'electron',
+  'javascript-ember': 'ember',
+  'javascript-gatsby': 'gatsby',
+  'javascript-ionic': 'ionic',
+  'javascript-nextjs': 'nextjs',
+  'javascript-react': 'react',
+  'javascript-remix': 'remix',
+  'javascript-svelte': 'svelte',
+  'javascript-sveltekit': 'svelte',
+  'javascript-vue': 'vue',
+  'javascript-wasm': 'wasm',
+  ionic: 'ionic',
+  kotlin: 'kotlin',
+  'kotlin-android': 'android',
+  linux: 'linux',
+  native: 'nativec',
+  'native-qt': 'qt',
+  node: 'nodejs',
+  'node-awslambda': 'aws',
+  'node-azurefunctions': 'azure',
+  'node-connect': 'nodejs',
+  'node-express': 'express',
+  'node-gcpfunctions': 'gcp',
+  'node-koa': 'koa',
+  'node-serverlesscloud': 'serverless',
+  perl: 'perl',
+  php: 'php',
+  'php-laravel': 'laravel',
+  'php-monolog': 'php',
+  'php-symfony2': 'symfony',
+  'php-symfony': 'symfony',
+  python: 'python',
+  'python-aiohttp': 'aiohttp',
+  'python-awslambda': 'aws',
+  'python-azurefunctions': 'azure',
+  'python-bottle': 'bottle',
+  'python-celery': 'celery',
+  'python-chalice': 'chalice',
+  'python-django': 'django',
+  'python-falcon': 'falcon',
+  'python-fastapi': 'fastapi',
+  'python-flask': 'flask',
+  'python-gcpfunctions': 'gcp',
+  'python-pylons': 'python',
+  'python-pyramid': 'pyramid',
+  'python-pythonawslambda': 'aws',
+  'python-rq': 'redis',
+  'python-sanic': 'python',
+  'python-serverless': 'serverless',
+  'python-starlette': 'starlette',
+  'python-tornado': 'tornado',
+  'python-tryton': 'tryton',
+  qt: 'qt',
+  'react-native': 'react-native',
+  ruby: 'ruby',
+  'ruby-rack': 'ruby',
+  'ruby-rails': 'rails',
+  'ruby-sinatra': 'sinatra',
+  rust: 'rust',
+  'rust-actix': 'actix',
+  scala: 'scala',
+  stride3d: 'stride3d',
+  swift: 'swift',
+  unity: 'unity',
+  // This will be deprecated in favor of 'unrealengine'
+  ue4: 'unreal',
+  unreal: 'unreal',
+  unrealengine: 'unreal',
+  visualbasic: 'visual-basic',
+  windows: 'windows',
 };
 
 const SECTIONS: TSection[] = [
@@ -1178,15 +1303,15 @@ const SECTIONS: TSection[] = [
 export default function IconsStories() {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const definedWitPrefix = new Set<string>();
+  const definedWithPrefix = new Set<string>();
   SECTIONS.forEach(section =>
-    section.icons.forEach(icon => definedWitPrefix.add(`Icon${icon.name}`))
+    section.icons.forEach(icon => definedWithPrefix.add(`Icon${icon.name}`))
   );
   const otherSection = {
     id: 'other',
     label: 'Unclassified',
     icons: Object.keys(Icons)
-      .filter(name => !definedWitPrefix.has(name))
+      .filter(name => !definedWithPrefix.has(name))
       .map(
         (name): TIcon => ({
           id: name,
@@ -1219,20 +1344,19 @@ export default function IconsStories() {
           onChange={e => setSearchTerm(e.target.value.toLowerCase())}
         />
       </Sticky>
+
       <section>
         <SectionHeader>See Also</SectionHeader>
 
-        <StoryList
-          links={[
-            'app/components/logoSentry.stories.tsx',
-            'app/components/platformIcon.stories.tsx',
-          ]}
-        />
+        <StoryList links={['app/components/logoSentry.stories.tsx']} />
       </section>
+
       <Section section={otherSection} />
       {filteredSections.map(section => (
         <Section key={section.id} section={section} />
       ))}
+
+      <PlatformIconsSection searchTerm={searchTerm} />
     </Fragment>
   );
 }
@@ -1268,6 +1392,36 @@ function Section({section}: {section: TSection}) {
             </Tooltip>
           );
         })}
+      </Grid>
+    </section>
+  );
+}
+
+function PlatformIconsSection({searchTerm}: {searchTerm: string}) {
+  const platforms = Object.keys(platformToIcon).filter(platform =>
+    platform.includes(searchTerm)
+  );
+
+  return (
+    <section>
+      <SectionHeader>PlatformIcons</SectionHeader>
+      <Grid
+        style={{
+          gridAutoFlow: 'column',
+          gridTemplateRows: `repeat(${Math.ceil(platforms.length / 4)}, 1fr)`,
+        }}
+      >
+        {platforms.map(platform => (
+          <Tooltip
+            key={platform}
+            title={formatObjAsReactStatement('PlatformIcon', {platform})}
+            isHoverable
+          >
+            <Cell>
+              <PlatformIcon platform={platform} /> {platform}
+            </Cell>
+          </Tooltip>
+        ))}
       </Grid>
     </section>
   );
