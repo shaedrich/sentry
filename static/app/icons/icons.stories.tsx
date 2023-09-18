@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import {PlatformIcon} from 'platformicons';
 
 import Input from 'sentry/components/input';
+import {Sticky} from 'sentry/components/sticky';
 import StoryList from 'sentry/components/stories/storyList';
 import {Tooltip} from 'sentry/components/tooltip';
 import * as Icons from 'sentry/icons';
@@ -1333,7 +1334,7 @@ export default function IconsStories() {
 
   return (
     <Fragment>
-      <Sticky>
+      <StyledSticky>
         <p>
           In addition to icon name, you can also search by keyword. For example, typing
           either <kbd>checkmark</kbd> or <kbd>success</kbd> will return{' '}
@@ -1343,7 +1344,7 @@ export default function IconsStories() {
           placeholder="Search icons by name or keyword"
           onChange={e => setSearchTerm(e.target.value.toLowerCase())}
         />
-      </Sticky>
+      </StyledSticky>
 
       <section>
         <SectionHeader>See Also</SectionHeader>
@@ -1438,11 +1439,12 @@ function formatObjAsReactStatement(name, props: Record<string, unknown>) {
     .join(' ')} />`;
 }
 
-const Sticky = styled('div')`
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 1;
+const StyledSticky = styled(Sticky)`
+  background: ${p => p.theme.background};
+  z-index: ${p => p.theme.zIndex.initial};
+  &[data-stuck='true'] {
+    box-shadow: 0px 10px 20px -8px rgba(128, 128, 128, 0.89);
+  }
 `;
 
 const SectionHeader = styled('h5')`
