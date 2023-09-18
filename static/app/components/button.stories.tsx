@@ -2,6 +2,7 @@ import {Fragment} from 'react';
 
 import {Button} from 'sentry/components/button';
 import Matrix from 'sentry/components/stories/matrix';
+import StoryList from 'sentry/components/stories/storyList';
 import {IconDelete} from 'sentry/icons';
 import storyBook from 'sentry/stories/storyBook';
 
@@ -13,6 +14,8 @@ export default storyBook('Button', story => {
     'danger' as const,
     'link' as const,
   ];
+
+  story('See Also', () => <StoryList links={['app/components/buttonBar.stories.tsx']} />);
 
   story('Default', () => <Button>Default Button</Button>);
 

@@ -11,7 +11,7 @@ export default storyBook('LogoSentry', story => {
 
   story('With children', () => (
     <SizingWindow style={{height: '190px'}}>
-      <LoadingTriangle>Things are loading...</LoadingTriangle>
+      <LoadingTriangle>This will take a while...</LoadingTriangle>
     </SizingWindow>
   ));
 });

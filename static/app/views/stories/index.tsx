@@ -6,8 +6,8 @@ import {space} from 'sentry/styles/space';
 import EmptyStory from 'sentry/views/stories/emptyStory';
 import ErrorStory from 'sentry/views/stories/errorStory';
 import StoryFile from 'sentry/views/stories/storyFile';
+import StoryFileTree from 'sentry/views/stories/storyFileTree';
 import StoryHeader from 'sentry/views/stories/storyHeader';
-import StoryList from 'sentry/views/stories/storyList';
 import type {StoriesQuery} from 'sentry/views/stories/types';
 import useStoriesLoader from 'sentry/views/stories/useStoriesLoader';
 
@@ -24,7 +24,7 @@ export default function Stories({
     <Layout>
       <StoryHeader style={{gridArea: 'head'}} />
       <aside style={{gridArea: 'aside'}}>
-        <StoryList files={FilesList} />
+        <StoryFileTree files={FilesList} />
       </aside>
 
       {story.error ? (

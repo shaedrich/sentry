@@ -12,7 +12,7 @@ interface Props extends ComponentProps<'div'> {
   files: string[];
 }
 
-export default function StoryList({files, style}: Props) {
+export default function StoryFileTree({files, style}: Props) {
   const tree = toTree(files);
 
   return (

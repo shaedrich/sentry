@@ -1,26 +1,33 @@
 import {Children, Fragment, ReactNode} from 'react';
 import styled from '@emotion/styled';
+import invariant from 'invariant';
 
 import SideBySide from 'sentry/components/stories/sideBySide';
 import {space} from 'sentry/styles/space';
 
 type RenderFn = () => ReactNode | ReactNode[];
-type StoryFn = (storyName: string, storyRender: RenderFn) => void;
+type StoryFn = ((storyRender: RenderFn) => void) &
+  ((storyName: string, storyRender: RenderFn) => void);
 type SetupFn = (story: StoryFn) => void;
 
 type Context = {
-  storyName: string;
-  storyRender: RenderFn;
+  name: undefined | string;
+  render: RenderFn;
 };
 
 export default function storyBook(rootName: string, setup: SetupFn) {
   const contexts: Context[] = [];
 
-  const storyFn = (storyName: string, storyRender: RenderFn) => {
-    contexts.push({
-      storyName,
-      storyRender,
-    });
+  const storyFn: StoryFn = (storyName: string | RenderFn, storyRender?: RenderFn) => {
+    const name = typeof storyName === 'string' ? storyName : undefined;
+    const render =
+      typeof storyRender === 'function'
+        ? storyRender
+        : typeof storyName === 'function'
+        ? storyName
+        : undefined;
+    invariant(render, 'A story must have a render function');
+    contexts.push({name, render});
   };
 
   setup(storyFn);
@@ -28,16 +35,16 @@ export default function storyBook(rootName: string, setup: SetupFn) {
   return function RenderStory() {
     return (
       <Fragment>
-        <h3>{rootName}</h3>
+        {rootName ? <h3>{rootName}</h3> : null}
         {/* <Legend contexts={contexts} /> */}
-        {contexts.map(({storyName, storyRender}, i) => {
-          const children = storyRender();
+        {contexts.map(({name, render}, i) => {
+          const children = render();
           const isOneChild = Children.count(children) === 1;
-          const key = `${i}_${storyName}`;
+          const key = `${i}_${name}`;
 
           return (
             <Story key={key}>
-              <StoryTitle id={key}>{storyName}</StoryTitle>
+              <StoryTitle id={key}>{name}</StoryTitle>
               {isOneChild ? children : <SideBySide>{children}</SideBySide>}
             </Story>
           );
