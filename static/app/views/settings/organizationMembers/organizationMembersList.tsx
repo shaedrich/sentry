@@ -62,7 +62,88 @@ class OrganizationMembersList extends DeprecatedAsyncView<Props, State> {
     return {
       ...super.getDefaultState(),
       members: [],
-      missingMembers: [],
+      missingMembers: [
+        {
+          integration: 'github',
+          users: [
+            {
+              commitCount: 6,
+              email: 'hello@asdfaj;;aldskfja;lsdkjf;alskjsldkfja;lsdkj.io',
+              externalId: 'github:hello',
+            },
+            {
+              commitCount: 5,
+              email: 'abcd@sentry.io',
+              externalId: 'github:abcd',
+            },
+            {
+              commitCount: 4,
+              email: 'hola@sentry.io',
+              externalId: 'github:hola',
+            },
+            {
+              commitCount: 3,
+              email: 'test@sentry.io',
+              externalId: 'github:test',
+            },
+            {
+              commitCount: 2,
+              email: 'five@sentry.io',
+              externalId: 'github:five',
+            },
+            {
+              commitCount: 6,
+              email: 'hello@sentry.io',
+              externalId: 'github:hello',
+            },
+            {
+              commitCount: 5,
+              email: 'abcd@sentry.io',
+              externalId: 'github:abcd',
+            },
+            {
+              commitCount: 4,
+              email: 'hola@sentry.io',
+              externalId: 'github:hola',
+            },
+            {
+              commitCount: 3,
+              email: 'test@sentry.io',
+              externalId: 'github:test',
+            },
+            {
+              commitCount: 2,
+              email: 'five@sentry.io',
+              externalId: 'github:five',
+            },
+            {
+              commitCount: 6,
+              email: 'hello@sentry.io',
+              externalId: 'github:hello',
+            },
+            {
+              commitCount: 5,
+              email: 'abcd@sentry.io',
+              externalId: 'github:abcd',
+            },
+            {
+              commitCount: 4,
+              email: 'hola@sentry.io',
+              externalId: 'github:hola',
+            },
+            {
+              commitCount: 3,
+              email: 'test@sentry.io',
+              externalId: 'github:test',
+            },
+            {
+              commitCount: 2,
+              email: 'five@sentry.io',
+              externalId: 'github:five',
+            },
+          ],
+        },
+      ],
       invited: {},
     };
   }
@@ -96,12 +177,12 @@ class OrganizationMembersList extends DeprecatedAsyncView<Props, State> {
       ],
 
       ['inviteRequests', `/organizations/${organization.slug}/invite-requests/`],
-      [
-        'missingMembers',
-        `/organizations/${organization.slug}/missing-members/`,
-        {},
-        {allowError: error => error.status === 403},
-      ],
+      // [
+      //   'missingMembers',
+      //   `/organizations/${organization.slug}/missing-members/`,
+      //   {},
+      //   {allowError: error => error.status === 403},
+      // ],
     ];
   }
 
