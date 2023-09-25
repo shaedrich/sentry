@@ -150,8 +150,11 @@ def devservices() -> None:
 
 @devservices.command()
 @click.option("--project", default="sentry")
+@click.option(
+    "--skip-only-if", is_flag=True, default=False, help="Skip 'only_if' checks for services"
+)
 @click.argument("service", nargs=1)
-def attach(project: str, service: str) -> None:
+def attach(project: str, skip_only_if: bool, service: str) -> None:
     """
     Run a single devservice in the foreground.
 
@@ -166,7 +169,7 @@ def attach(project: str, service: str) -> None:
 
     configure()
 
-    containers = _prepare_containers(project, silent=True)
+    containers = _prepare_containers(project, skip_only_if=skip_only_if, silent=True)
     if service not in containers:
         raise click.ClickException(f"Service `{service}` is not known or not enabled.")
 
@@ -591,7 +594,9 @@ def check_health(service_name: str, containers: dict[str, Any]) -> None:
         healthcheck["check"](containers)
 
     try:
-        run_with_retries(hc)
+        run_with_retries(
+            hc, retries=healthcheck.get("retries", 3), timeout=healthcheck.get("timeout", 5)
+        )
     except subprocess.CalledProcessError:
         click.secho(f"> '{service_name}' is not healthy", fg="red")
         raise
@@ -656,6 +661,24 @@ def check_postgres(containers: dict[str, Any]) -> None:
     )
 
 
+def check_zookeeper(containers: dict[str, Any]) -> None:
+    options = containers["zookeeper"]
+    port = options["environment"]["ZOOKEEPER_CLIENT_PORT"]
+    subprocess.run(
+        (
+            "docker",
+            "exec",
+            options["name"],
+            "bash",
+            "-c",
+            f"echo ruok | nc localhost {port}",
+        ),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
 class ServiceHealthcheck(TypedDict):
     check: Callable[[dict[str, Any]], None]
 
@@ -666,5 +689,10 @@ service_healthchecks: dict[str, ServiceHealthcheck] = {
     },
     "kafka": {
         "check": check_kafka,
+    },
+    "zookeeper": {
+        "check": check_zookeeper,
+        "retries": 4,
+        "timeout": 10,
     },
 }
