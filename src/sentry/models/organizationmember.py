@@ -247,6 +247,7 @@ class OrganizationMember(Model):
         app_label = "sentry"
         db_table = "sentry_organizationmember"
         unique_together = (("organization", "user_id"), ("organization", "email"))
+        index_together = (("organization", "user_email"),)
 
     __repr__ = sane_repr("organization_id", "user_id", "email", "role")
 
