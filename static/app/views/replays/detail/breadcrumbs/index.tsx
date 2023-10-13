@@ -13,15 +13,17 @@ import getFrameDetails from 'sentry/utils/replays/getFrameDetails';
 import useActiveReplayTab from 'sentry/utils/replays/hooks/useActiveReplayTab';
 import useCrumbHandlers from 'sentry/utils/replays/hooks/useCrumbHandlers';
 import useExtractedDomNodes from 'sentry/utils/replays/hooks/useExtractedDomNodes';
+import useOrganization from 'sentry/utils/useOrganization';
 import BreadcrumbRow from 'sentry/views/replays/detail/breadcrumbs/breadcrumbRow';
 import useScrollToCurrentItem from 'sentry/views/replays/detail/breadcrumbs/useScrollToCurrentItem';
 import FilterLoadingIndicator from 'sentry/views/replays/detail/filterLoadingIndicator';
 import FluidHeight from 'sentry/views/replays/detail/layout/fluidHeight';
 import NoRowRenderer from 'sentry/views/replays/detail/noRowRenderer';
+import useReplayPerfData from 'sentry/views/replays/detail/perfTable/useReplayPerfData';
 import TabItemContainer from 'sentry/views/replays/detail/tabItemContainer';
+import useVirtualizedInspector from 'sentry/views/replays/detail/useVirtualizedInspector';
 import useVirtualizedList from 'sentry/views/replays/detail/useVirtualizedList';
-
-import useVirtualizedInspector from '../useVirtualizedInspector';
+import useVirtualListDimentionChange from 'sentry/views/replays/detail/useVirtualListDimentionChange';
 
 // Ensure this object is created once as it is an input to
 // `useVirtualizedList`'s memoization
@@ -31,10 +33,14 @@ const cellMeasurer = {
 };
 
 function Breadcrumbs() {
+  const organization = useOrganization();
+  const hasPerfTab = organization.features.includes('session-replay-trace-table');
+
   const {replay} = useReplayContext();
   const {onClickTimestamp} = useCrumbHandlers();
   const {data: frameToExtraction, isFetching: isFetchingExtractions} =
     useExtractedDomNodes({replay});
+  const {data: frameToTrace, isFetching: isFetchingTraces} = useReplayPerfData({replay});
 
   const frames = replay?.getChapterFrames();
   const startTimestampMs = replay?.getReplay()?.started_at?.getTime() || 0;
@@ -57,7 +63,8 @@ function Breadcrumbs() {
     ref: listRef,
     deps,
   });
-  const {handleDimensionChange} = useVirtualizedInspector({
+  const {handleDimensionChange} = useVirtualListDimentionChange({cache, listRef});
+  const {handleDimensionChange: handleInspectorExpanded} = useVirtualizedInspector({
     cache,
     listRef,
     expandPathsRef,
@@ -68,12 +75,12 @@ function Breadcrumbs() {
     ref: listRef,
   });
 
-  // Need to refresh the item dimensions when DOM info is loaded
+  // Need to refresh the item dimensions as DOM & Trace data gets loaded
   useEffect(() => {
-    if (!isFetchingExtractions) {
+    if (!isFetchingExtractions || !isFetchingTraces) {
       updateList();
     }
-  }, [isFetchingExtractions, updateList]);
+  }, [isFetchingExtractions, isFetchingTraces, updateList]);
 
   const renderRow = ({index, key, style, parent}: ListRowProps) => {
     const item = (frames || [])[index];
@@ -90,6 +97,7 @@ function Breadcrumbs() {
           index={index}
           frame={item}
           extraction={frameToExtraction?.get(item)}
+          traces={hasPerfTab ? frameToTrace?.get(item) : undefined}
           startTimestampMs={startTimestampMs}
           style={style}
           expandPaths={Array.from(expandPathsRef.current?.get(index) || [])}
@@ -98,6 +106,7 @@ function Breadcrumbs() {
             setActiveTab(getFrameDetails(item).tabKey);
           }}
           onDimensionChange={handleDimensionChange}
+          onInspectorExpanded={handleInspectorExpanded}
         />
       </CellMeasurer>
     );
@@ -105,7 +114,7 @@ function Breadcrumbs() {
 
   return (
     <FluidHeight>
-      <FilterLoadingIndicator isLoading={isFetchingExtractions}>
+      <FilterLoadingIndicator isLoading={isFetchingExtractions || isFetchingTraces}>
         {''}
       </FilterLoadingIndicator>
       <TabItemContainer>
