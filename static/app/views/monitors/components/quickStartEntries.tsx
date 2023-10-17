@@ -717,3 +717,88 @@ Sentry.captureCheckIn(
     </Fragment>
   );
 }
+
+// TODO-neel add ruby upsert docs
+export function RubyUpsertPlatformGuide() {
+  const configCode = `# Create a config from a crontab schedule (every 10 minutes)
+monitor_config = Sentry::Cron::MonitorConfig.from_crontab(
+  '5 * * * *',
+  checkin_margin: 5, # Optional check-in margin in minutes
+  max_runtime: 15, # Optional max runtime in minutes
+  timezone: 'Europe/Vienna', # Optional timezone
+)
+
+# Create a config from an interval schedule (every 10 minutes)
+monitor_config = Sentry::Cron::MonitorConfig.from_interval(
+  10,
+  :minute,
+  checkin_margin: 5, # Optional check-in margin in minutes
+  max_runtime: 15, # Optional max runtime in minutes
+  timezone: 'Europe/Vienna', # Optional timezone
+)`;
+
+  const upsertCode = `# 🟡 Notify Sentry your job is running:
+check_in_id = Sentry.capture_check_in(
+  '<monitor-slug>',
+  :in_progress,
+  monitor_config: monitor_config
+)
+
+# Execute your scheduled task here...
+
+# 🟢 Notify Sentry your job has completed successfully:
+Sentry.capture_check_in(
+  '<monitor-slug>',
+  :ok,
+  check_in_id: check_in_id,
+  monitor_config: monitor_config
+)`;
+
+  return (
+    <Fragment>
+      <div>
+        {tct(
+          'You can use the [additionalDocs: Ruby SDK] to create and update your Monitors programmatically with code rather than creating them manually.',
+          {
+            additionalDocs: (
+              <ExternalLink href="https://docs.sentry.io/platforms/ruby/crons/#upserting-cron-monitors" />
+            ),
+          }
+        )}
+      </div>
+      <CodeSnippet language="ruby">{configCode}</CodeSnippet>
+      <CodeSnippet language="ruby">{upsertCode}</CodeSnippet>
+    </Fragment>
+  );
+}
+
+export function RubyCronQuickStart(props: QuickStartProps) {
+  const {slug} = withDefaultProps(props);
+
+  const checkInSuccessCode = `# 🟡 Notify Sentry your job is running:
+check_in_id = Sentry.capture_check_in('${slug}', :in_progress)
+
+# Execute your scheduled task here...
+
+# 🟢 Notify Sentry your job has completed successfully:
+Sentry.capture_check_in('${slug}', :ok, check_in_id: check_in_id)`;
+
+  const checkInFailCode = `// 🔴 Notify Sentry your job has failed:
+Sentry.capture_check_in('${slug}', :error, check_in_id: check_in_id)`;
+
+  return (
+    <Fragment>
+      <div>
+        {tct(
+          '[installLink:Install and configure] the Sentry Ruby SDK (min v5.12.0), then instrument your monitor:',
+          {
+            installLink: <ExternalLink href="https://docs.sentry.io/platforms/ruby/" />,
+          }
+        )}
+      </div>
+      <CodeSnippet language="ruby">{checkInSuccessCode}</CodeSnippet>
+      <div>{t('To notify Sentry if your job execution fails')}</div>
+      <CodeSnippet language="ruby">{checkInFailCode}</CodeSnippet>
+    </Fragment>
+  );
+}
