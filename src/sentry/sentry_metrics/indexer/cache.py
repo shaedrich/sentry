@@ -120,6 +120,13 @@ class StringIndexerCache:
             timeout=self.randomized_ttl,
             version=self.version,
         )
+        if options.get("sentry-metrics.indexer.write-new-cache-namespace"):
+            self.cache.set(
+                key=self._make_namespaced_cache_key(namespace, key),
+                value=value,
+                timeout=self.randomized_ttl,
+                version=self.version,
+            )
 
     def get_many(self, namespace: str, keys: Iterable[str]) -> MutableMapping[str, Optional[int]]:
         if options.get("sentry-metrics.indexer.read-new-cache-namespace"):
@@ -143,6 +150,13 @@ class StringIndexerCache:
     def set_many(self, namespace: str, key_values: Mapping[str, int]) -> None:
         cache_key_values = {self._make_cache_key(k): v for k, v in key_values.items()}
         self.cache.set_many(cache_key_values, timeout=self.randomized_ttl, version=self.version)
+        if options.get("sentry-metrics.indexer.write-new-cache-namespace"):
+            name_sapced_cache_key_values = {
+                self._make_namespaced_cache_key(namespace, k): v for k, v in key_values.items()
+            }
+            self.cache.set_many(
+                name_sapced_cache_key_values, timeout=self.randomized_ttl, version=self.version
+            )
 
     def delete(self, namespace: str, key: str) -> None:
         cache_key = self._make_cache_key(key)
