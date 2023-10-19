@@ -13,7 +13,7 @@ from arroyo.processing.strategies import Healthcheck
 from arroyo.processing.strategies.abstract import ProcessingStrategy, ProcessingStrategyFactory
 from django.conf import settings
 
-from sentry.conf.types.consumer_definition import ConsumerDefinition
+from sentry.conf.types.consumer_definition import ConsumerDefinition, validate_consumer_definition
 from sentry.consumers.validate_schema import ValidateSchema
 from sentry.utils.imports import import_string
 from sentry.utils.kafka_config import get_kafka_producer_cluster_options, get_topic_definition
@@ -307,6 +307,12 @@ def get_stream_processor(
             f"Most likely there is another subcommand in 'sentry run' "
             f"responsible for this consumer"
         )
+    try:
+        validate_consumer_definition(consumer_definition)
+    except ValueError as e:
+        raise click.ClickException(
+            f"Invalid consumer definition configured for {consumer_name}"
+        ) from e
 
     strategy_factory_cls = import_string(consumer_definition["strategy_factory"])
     logical_topic = consumer_definition["topic"]
@@ -416,12 +422,7 @@ def get_stream_processor(
             raise click.BadParameter(
                 f"Cannot enable DLQ for consumer: {consumer_name}, DLQ topic is not specified in consumer definition"
             )
-        try:
-            cluster_setting = get_topic_definition(dlq_topic)["cluster"]
-        except ValueError:
-            raise click.BadParameter(
-                f"Invalid DLQ topic: {dlq_topic}, all DLQ topics must have topic definition configured in settings"
-            )
+        cluster_setting = get_topic_definition(dlq_topic)["cluster"]
 
         producer_config = get_kafka_producer_cluster_options(cluster_setting)
         producer_config.pop("message.max.bytes", None)
